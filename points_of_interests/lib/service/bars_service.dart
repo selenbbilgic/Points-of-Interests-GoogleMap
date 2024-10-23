@@ -17,7 +17,6 @@ Future<List<Bar>> fetchNearbyBars(LatLng center) async {
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
     final List<dynamic> results = data['results'];
-    print(results.map((result) => Bar.fromJson(result)).toList());
     return results.map((result) => Bar.fromJson(result)).toList();
   } else {
     throw Exception('Failed to load nearby restaurants');

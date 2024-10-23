@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:points_of_interests/app/extension/context_extension.dart';
 import '/ViewController/MapViewController.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -23,13 +24,18 @@ class _Map_ViewState extends State<Map_View> {
     _mapViewController.setMapStyle(context);
     _mapViewController.getUserLocation(() {
       _mapViewController.getNearbyBars(() {
-        setState(() {});
+        setState(() {}); // Update the UI after fetching the bars
       });
     });
+  }
 
-    // _mapViewController.getNearbyBars(() {
-    //   setState(() {});
-    // });
+  void _searchHere() async {
+    _mapViewController.getCurrentPOIs(() {
+      // Now that the center has been updated, fetch the new POIs
+      _mapViewController.getNearbyBars(() {
+        setState(() {}); // Update the UI after fetching the new bars
+      });
+    });
   }
 
   @override
@@ -43,7 +49,7 @@ class _Map_ViewState extends State<Map_View> {
                   onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
                     target: _mapViewController.center,
-                    zoom: 14.0,
+                    zoom: 15.0,
                   ),
                   zoomGesturesEnabled: true,
                   markers: _mapViewController.mapMarkers.map((marker) {
@@ -55,10 +61,11 @@ class _Map_ViewState extends State<Map_View> {
                       },
                     );
                   }).toSet(),
+                  myLocationButtonEnabled: false,
                 ),
                 Positioned(
-                  top: 40,
-                  right: 10,
+                  bottom: 40,
+                  left: 10,
                   child: Column(
                     children: [
                       FloatingActionButton(
@@ -74,7 +81,10 @@ class _Map_ViewState extends State<Map_View> {
                       FloatingActionButton(
                         onPressed: () {
                           _mapViewController.getUserLocation(() {
-                            setState(() {});
+                            _mapViewController.getNearbyBars(() {
+                              setState(
+                                  () {}); // Update the UI after fetching the bars
+                            });
                           });
                         },
                         child: const Icon(Icons.place),
@@ -82,6 +92,23 @@ class _Map_ViewState extends State<Map_View> {
                     ],
                   ),
                 ),
+                Container(
+                    //decoration: BoxDecoration(color: context.secondaryColor),
+                    padding: context.paddingP60,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: 150,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              context.secondaryColor, // Button background color
+                          foregroundColor: context.whiteColor, // Text color
+                        ),
+                        onPressed: _searchHere,
+                        child: const Text('Search Here'),
+                      ),
+                    )),
               ],
             ),
     );

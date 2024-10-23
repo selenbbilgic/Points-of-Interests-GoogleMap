@@ -38,6 +38,7 @@ class MapViewController {
     bool serviceEnabled;
     LocationPermission permission;
     Position _currentPosition;
+    mapMarkers.clear();
 
 // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -83,7 +84,7 @@ class MapViewController {
 
     mapController.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(center.latitude, center.longitude),
-      zoom: 11,
+      zoom: 15,
     )));
 
     isLoading = false;
@@ -98,14 +99,40 @@ class MapViewController {
         id: '${bar.name}-${bar.latitude}-${bar.longitude}',
         name: bar.name,
         location: LatLng(bar.latitude, bar.longitude),
-        icon: BitmapDescriptor.defaultMarker,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
       );
     }).toList());
 
-    print(mapMarkers[1].id.toString() +
-        mapMarkers[2].id +
-        mapMarkers[19].id.toString());
     onBarsFetched();
     //isLoading = false;
+  }
+
+  void getCurrentPOIs(Function onCenterFetched) async {
+    mapMarkers.clear();
+    LatLng _currentCenter = await _getCurrentMapCenter();
+    center = _currentCenter;
+
+    mapMarkers.add(
+      MapMarker(
+        id: 'centered_location',
+        name: 'Center Location',
+        location: center,
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueBlue), // Custom marker for user
+      ),
+    );
+    onCenterFetched();
+  }
+
+  Future<LatLng> _getCurrentMapCenter() async {
+    LatLngBounds visibleRegion = await mapController.getVisibleRegion();
+    double centerLat =
+        (visibleRegion.northeast.latitude + visibleRegion.southwest.latitude) /
+            2;
+    double centerLng = (visibleRegion.northeast.longitude +
+            visibleRegion.southwest.longitude) /
+        2;
+
+    return LatLng(centerLat, centerLng); // Return the map's current center
   }
 }

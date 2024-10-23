@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
 extension ContextExtension on BuildContext {
-  // Google Maps
+  // app colors
+  Color get primaryColor => const Color.fromARGB(255, 244, 201, 73);
+  Color get secondaryColor => const Color.fromARGB(255, 143, 83, 40);
+  Color get whiteColor => const Color.fromARGB(255, 255, 255, 255);
 
+  // Padding
+  EdgeInsets get paddingP10 => const EdgeInsets.all(10);
+  EdgeInsets get paddingP60 => const EdgeInsets.all(60);
+
+  // Google Maps
   String get googleMapStyle => '''
 [
   {
