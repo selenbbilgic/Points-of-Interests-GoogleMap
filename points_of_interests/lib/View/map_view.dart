@@ -13,7 +13,6 @@ class Map_View extends StatefulWidget {
 class _Map_ViewState extends State<Map_View> {
   @override
   void initState() {
-    _mapViewController.getUserLocation();
     super.initState();
   }
 
@@ -21,46 +20,70 @@ class _Map_ViewState extends State<Map_View> {
 
   void _onMapCreated(GoogleMapController controller) {
     _mapViewController.setMapController(controller);
+    _mapViewController.setMapStyle(context);
+    _mapViewController.getUserLocation(() {
+      _mapViewController.getNearbyBars(() {
+        setState(() {});
+      });
+    });
+
+    // _mapViewController.getNearbyBars(() {
+    //   setState(() {});
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _mapViewController.center,
-              zoom: 14.0,
-            ),
-            zoomGesturesEnabled: true,
-            markers: {
-              Marker(
-                  markerId: MarkerId("_currentLocation"),
-                  icon: BitmapDescriptor.defaultMarker,
-                  position: _mapViewController.center)
-            },
-          ),
-          Positioned(
-            top: 40,
-            right: 10,
-            child: Column(
+      body: _mapViewController.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
               children: [
-                FloatingActionButton(
-                  onPressed: _mapViewController.zoomIn,
-                  child: const Icon(Icons.zoom_in),
+                GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: _mapViewController.center,
+                    zoom: 14.0,
+                  ),
+                  zoomGesturesEnabled: true,
+                  markers: _mapViewController.mapMarkers.map((marker) {
+                    return marker.toMarker(
+                      infoWindow: InfoWindow(title: marker.name),
+                      onTap: () {
+                        // Handle marker tap
+                        print("Marker tapped: ${marker.name}");
+                      },
+                    );
+                  }).toSet(),
                 ),
-                const SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _mapViewController.zoomOut,
-                  child: const Icon(Icons.zoom_out),
+                Positioned(
+                  top: 40,
+                  right: 10,
+                  child: Column(
+                    children: [
+                      FloatingActionButton(
+                        onPressed: _mapViewController.zoomIn,
+                        child: const Icon(Icons.zoom_in),
+                      ),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                        onPressed: _mapViewController.zoomOut,
+                        child: const Icon(Icons.zoom_out),
+                      ),
+                      const SizedBox(height: 10),
+                      FloatingActionButton(
+                        onPressed: () {
+                          _mapViewController.getUserLocation(() {
+                            setState(() {});
+                          });
+                        },
+                        child: const Icon(Icons.place),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
