@@ -39,4 +39,4 @@ Google Places API: This was used to fetch the nearby bars by sending requests ba
 ## Conclusion
 
 This Flutter app displays Points of Interest (POIs) around a
-user's current or given location within a 1km radius. The app can run on both Android and iOS with minimal platform-specific changes. 
+user's current or given location within a 1 km radius. The app can run on both Android and iOS with minimal platform-specific changes. 
