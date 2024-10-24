@@ -5,14 +5,12 @@ import 'dart:ui';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapMarker {
+  // Marker class to store different type of pointers.
   MapMarker({
     required this.id,
     required this.name,
     required this.location,
     required this.icon,
-    int? clusterId,
-    int? pointsSize,
-    String? childMarkerId,
   });
 
   final String id;
@@ -24,23 +22,27 @@ class MapMarker {
   MapMarker copyWith({
     String? id,
     String? name,
-    LatLng? position,
+    LatLng? location,
     BitmapDescriptor? icon,
   }) {
     return MapMarker(
       id: id ?? this.id,
       name: name ?? this.name,
-      location: position ?? this.location,
+      location: this.location,
       icon: icon ?? this.icon,
     );
   }
 
-  Marker toMarker(
-      {required InfoWindow? infoWindow, required VoidCallback onTap}) {
+  Marker toMarker({required VoidCallback onTap}) {
+    // Convert MapMarker object to Marker
     return Marker(
       markerId: MarkerId(id),
-      infoWindow: infoWindow ?? InfoWindow.noText,
       onTap: onTap,
+      infoWindow: id == "user_location" // show info window if user's location
+          ? const InfoWindow(
+              title: "This is you!",
+            )
+          : const InfoWindow(),
       position: LatLng(
         location.latitude,
         location.longitude,

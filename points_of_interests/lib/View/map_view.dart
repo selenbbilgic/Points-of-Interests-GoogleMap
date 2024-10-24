@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:points_of_interests/View/bar_details_view.dart';
 import 'package:points_of_interests/app/extension/context_extension.dart';
 import '/ViewController/MapViewController.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,16 +25,16 @@ class _Map_ViewState extends State<Map_View> {
     _mapViewController.setMapStyle(context);
     _mapViewController.getUserLocation(() {
       _mapViewController.getNearbyBars(() {
-        setState(() {}); // Update the UI after fetching the bars
+        setState(() {}); // Update UI after fetching the bars
       });
     });
   }
 
   void _searchHere() async {
     _mapViewController.getCurrentPOIs(() {
-      // Now that the center has been updated, fetch the new POIs
+      // Now, the center has been updated, fetch the new POIs
       _mapViewController.getNearbyBars(() {
-        setState(() {}); // Update the UI after fetching the new bars
+        setState(() {}); // Update UI after fetching the new bars
       });
     });
   }
@@ -46,6 +47,7 @@ class _Map_ViewState extends State<Map_View> {
           : Stack(
               children: [
                 GoogleMap(
+                  // Map initialization
                   onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
                     target: _mapViewController.center,
@@ -53,11 +55,24 @@ class _Map_ViewState extends State<Map_View> {
                   ),
                   zoomGesturesEnabled: true,
                   markers: _mapViewController.mapMarkers.map((marker) {
+                    // Markers that are stored in the ViewModel
                     return marker.toMarker(
-                      infoWindow: InfoWindow(title: marker.name),
-                      onTap: () {
-                        // Handle marker tap
-                        print("Marker tapped: ${marker.name}");
+                      onTap: () async {
+                        marker.id !=
+                                "user_location" // Don't show details for the users current location
+                            // Handle marker tap
+                            // The pop up screen to display the map details
+                            ? await showModalBottomSheet(
+                                context: context,
+                                backgroundColor: context.whiteColor,
+                                isScrollControlled: true,
+                                builder: (context) {
+                                  return BarDetailsView(
+                                    marker: marker,
+                                  );
+                                },
+                              )
+                            : null;
                       },
                     );
                   }).toSet(),
@@ -68,22 +83,30 @@ class _Map_ViewState extends State<Map_View> {
                   left: 10,
                   child: Column(
                     children: [
+                      // Zoom In
                       FloatingActionButton(
+                        focusColor: context.secondaryColor,
+                        backgroundColor: context.primaryColor,
                         onPressed: _mapViewController.zoomIn,
                         child: const Icon(Icons.zoom_in),
                       ),
                       const SizedBox(height: 10),
+                      // Zoom out
                       FloatingActionButton(
+                        focusColor: context.secondaryColor,
+                        backgroundColor: context.primaryColor,
                         onPressed: _mapViewController.zoomOut,
                         child: const Icon(Icons.zoom_out),
                       ),
                       const SizedBox(height: 10),
                       FloatingActionButton(
+                        // Center the map back to the user's current location.
+                        focusColor: context.secondaryColor,
+                        backgroundColor: context.primaryColor,
                         onPressed: () {
                           _mapViewController.getUserLocation(() {
                             _mapViewController.getNearbyBars(() {
-                              setState(
-                                  () {}); // Update the UI after fetching the bars
+                              setState(() {});
                             });
                           });
                         },
@@ -92,8 +115,9 @@ class _Map_ViewState extends State<Map_View> {
                     ],
                   ),
                 ),
+
+                // Search here button implementation
                 Container(
-                    //decoration: BoxDecoration(color: context.secondaryColor),
                     padding: context.paddingP60,
                     alignment: Alignment.topCenter,
                     child: SizedBox(
@@ -101,9 +125,8 @@ class _Map_ViewState extends State<Map_View> {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              context.secondaryColor, // Button background color
-                          foregroundColor: context.whiteColor, // Text color
+                          backgroundColor: context.secondaryColor,
+                          foregroundColor: context.whiteColor,
                         ),
                         onPressed: _searchHere,
                         child: const Text('Search Here'),

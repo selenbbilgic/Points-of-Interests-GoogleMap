@@ -17,6 +17,7 @@ class MapViewController {
   bool isLoading = false;
 
   void setMapController(GoogleMapController controller) {
+    //Set the map controller
     mapController = controller;
   }
 
@@ -28,8 +29,9 @@ class MapViewController {
     mapController.animateCamera(CameraUpdate.zoomOut());
   }
 
-  // Accept BuildContext to apply map style
   Future<void> setMapStyle(BuildContext context) async {
+    // Set map style to remove other markers
+    // Accept build context
     mapController.setMapStyle(context.googleMapStyle);
   }
 
@@ -67,8 +69,8 @@ class MapViewController {
       return;
     }
 
-    //center = LatLng(_currentPosition.latitude, _currentPosition.longitude);
-    center = LatLng(40.983235, 29.025656);
+    center = LatLng(_currentPosition.latitude, _currentPosition.longitude);
+    //center = LatLng(40.983235, 29.025656);
 
     mapMarkers.add(
       MapMarker(
@@ -76,7 +78,7 @@ class MapViewController {
         name: 'Your Location',
         location: center,
         icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue), // Custom marker for user
+            BitmapDescriptor.hueAzure), // Custom marker for user
       ),
     );
 
@@ -92,7 +94,6 @@ class MapViewController {
 
 //get the nearby bars
   Future<void> getNearbyBars(Function onBarsFetched) async {
-    //isLoading = true;
     bars = await fetchNearbyBars(center);
     mapMarkers.addAll(bars.map((bar) {
       return MapMarker(
@@ -104,9 +105,9 @@ class MapViewController {
     }).toList());
 
     onBarsFetched();
-    //isLoading = false;
   }
 
+  // Update the center and get the new POIs
   void getCurrentPOIs(Function onCenterFetched) async {
     mapMarkers.clear();
     LatLng _currentCenter = await _getCurrentMapCenter();
@@ -115,15 +116,16 @@ class MapViewController {
     mapMarkers.add(
       MapMarker(
         id: 'centered_location',
-        name: 'Center Location',
+        name: 'Centered Location',
         location: center,
         icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue), // Custom marker for user
+            BitmapDescriptor.hueAzure), // Custom marker for user
       ),
     );
     onCenterFetched();
   }
 
+  //Get the center of the selected map area
   Future<LatLng> _getCurrentMapCenter() async {
     LatLngBounds visibleRegion = await mapController.getVisibleRegion();
     double centerLat =
